@@ -46,7 +46,7 @@ class SwiftConverter
   
   def to_a
     @swift_file.each do |  line |
-      process_swift_line( line )
+      @swift_array << process_swift_line( line )
     end
   end
 
@@ -54,19 +54,23 @@ class SwiftConverter
     line = file_line.chomp
     
     if line =~ /^{\d/
-      @swift_array << [ :header, { header: line } ]
+      [ :header, { header: line } ]
     elsif line =~ /^-}/
-      @swift_array << [ :footer, { footer: line } ]
+      [ :footer, { footer: line } ]
     else
       tag = line.slice( /^:\d\d[A-Z]?:/ )
 
       if tag
         @current_tag = tag.gsub( ':', '' )
-        @swift_array << parse_swift_line( line )
+        parse_swift_line( line )
       else
-        parse_swift_extra ( line )
+        # lines without a tag modify the last line of the array
+        # to minimize side effects pop the last array element
+        # before applying the modifications
+        
+        modify_line = @swift_array.pop
+        parse_swift_extra( line, modify_line )
       end
-
     end
   end
 
@@ -207,19 +211,21 @@ class SwiftConverter
     ]
   end
 
-  def parse_swift_extra( line )
+  def parse_swift_extra( line, modify_line )
     if @current_tag == '61'
       # Tag 61 supplementary details
-      @swift_array[-1][1][:further_reference] = line.slice( 0, 34 )
+      modify_line[ 1 ][ :further_reference ] = line.slice( 0, 34 )
     elsif @current_tag == '86'
       # Tag 86 additional lines
       @tag_86_count += 1
       description_sym = 'description_' + @tag_86_count.to_s
       description_sym = description_sym.to_sym
-      @swift_array[-1][1][ description_sym ] = line.slice( 0, 34 )
+      modify_line[ 1 ][ description_sym ] = line.slice( 0, 34 )
     else
       $stderr.puts "Onbekende tag: #{@current_tag}"
     end
+
+    modify_line
   end
 
 end
