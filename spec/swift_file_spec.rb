@@ -1,3 +1,5 @@
+require 'spec_helper'
+require 'swift'
 require 'swift_converter'
 
 describe SwiftConverter do
@@ -6,7 +8,7 @@ describe SwiftConverter do
   end
 
   it 'returns a non empty array when given a valid SWIFT file' do
-    swift_file = SwiftConverter.new( File.new( 'D:\Mijn Documenten\Develop\Swift\Data\DFEZ.SWIFT', 'r') )
+    swift_file = SwiftConverter.new( File.new( 'data/DFEZ.SWIFT', 'r') )
     swift_array = swift_file.swift_array
     expect( swift_array.empty? ).to be_false
   end
