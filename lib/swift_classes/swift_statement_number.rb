@@ -7,13 +7,17 @@ module SwiftClasses
       raw = @raw.sub( /^:[^:]+:/, '' )
       @fields[ :tag ] = '28'
       @fields[ :statement_number ] = raw.slice( /^\d+/ )
+      @fields[ :sequence_number ] = sequence_number( raw )
+    end
 
+    def sequence_number( raw )
       if raw =~ /\//
-        @fields[ :sequence_number ] = raw.slice( /[^\/]+$/ )
+        raw.slice( /[^\/]+$/ )
       else
-        @fields[ :sequence_number ] = ' ' 
+        ' ' 
       end
     end
+    
   end
 
 end

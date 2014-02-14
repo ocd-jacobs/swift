@@ -14,6 +14,10 @@ module SwiftClasses
       convert
     end
 
+    def keys
+      @fields.keys
+    end
+
     def field( key )
       # using fetch to force an exeption. Not specifying a valid key
       # indicates not understanding the Swift format
@@ -27,9 +31,6 @@ module SwiftClasses
       raise NoMethodError, 'SwiftLine#convert not overridden!' if self.class != SwiftLine
     end
 
-    def keys
-      @fields.keys
-    end
   end
   
 end
