@@ -35,6 +35,7 @@ module SwiftClasses
       end
 
       @messages = []
+      @swift_61_string = ''
     end
     
     def messages
@@ -92,7 +93,12 @@ module SwiftClasses
       tag = line.slice( /:[^:]+:/ )
       
       if tag =~ /61/
+        unless @swift_61_string.empty?
+          @message.statement_lines << SwiftStatementLine.new( @swift_61_string, @swift_61_extra_string, @swift_86_array )
+        end
+        
         @swift_61_string = line
+        @swift_61_extra_string = ''
         @swift_86_array = []
       elsif tag =~ /86/
         @swift_86_array << line
@@ -106,9 +112,11 @@ module SwiftClasses
       tag = line.slice( /:[^:]+:/ )
       
       if tag =~ /62/
-        @message.statement_lines = SwiftStatementLine.new( @swift_61_string, @swift_61_extra_string, @swift_86_array )
-        @message.closing_balance = SwiftClosingBalance.new( line )
+        @message.statement_lines << SwiftStatementLine.new( @swift_61_string, @swift_61_extra_string, @swift_86_array )
+        @swift_61_string = ''
+        @swift_61_extra_string = ''
         @swift_86_array = []
+        @message.closing_balance = SwiftClosingBalance.new( line )
       else
         @swift_86_array << line
       end
