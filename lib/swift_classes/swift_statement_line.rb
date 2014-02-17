@@ -116,15 +116,3 @@ module SwiftClasses
 
 end
 
-#
-#a = SwiftClasses::SwiftStatementLine.new( ':61:1312311231C100,00N654NOTPROVIDED',
-#                                          '/EC-COMPLIANT',
-#                                          [':86:/IBAN/NL82INGB0006504334/BIC/INGBNL2A/NAME/HR M OULAD YOUSSEF EN/',
-#                                           'OF MW S OULAD YOUSSEF/REMI/BETALINGSREGELING M. OULAD YOUSSEF. DE',
-#                                           'BITEURENNUMMER 88005215./EREF/NOTPROVIDED']
-#                                          )
-#a.keys.each do |k|
-#  print k.to_s + " - "
-#  puts a.field(k)
-#end
-#
