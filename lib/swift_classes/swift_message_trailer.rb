@@ -5,7 +5,7 @@ module SwiftClasses
   class SwiftMessageTrailer < SwiftLine
     def convert
       @fields[ :tag ] = 'trailer'
-      @fields[ :footer ] = raw
+      @fields[ :trailer ] = raw
     end
   end
 
