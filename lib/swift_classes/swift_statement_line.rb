@@ -103,24 +103,48 @@ module SwiftClasses
       end
       description_string.squeeze(' ')
 
-      get_transaction_field( :iban, description_string, /\/IBAN\/(.+)\/BIC\// )
-      get_transaction_field( :bic, description_string, /\/BIC\/(.+)\/NAME\// )
-      get_transaction_field( :name, description_string, /\/NAME\/(.+)\/RTRN|REMI|EREF\// )
-      get_transaction_field( :rtrn, description_string, /\/RTRN\/(.+)\/REMI|EREF\// )
-      get_transaction_field( :remi, description_string, /\/REMI\/(.+)\/EREF\// )
-      get_transaction_field( :eref, description_string, /\/EREF\/(.+)(\/ORDP\/\/ID|BENM\/\/ID|UDTR|UCRD|PURP|FX\/)*/ )
-      get_transaction_field( :ordp_id, description_string, /\/ORDP\/\/ID\/(.+)(\/BENM\/\/ID|UDTR|UCRD|PURP|FX\/)*/ )
-      get_transaction_field( :benm_id, description_string, /\/BENM\/\/ID\/(.+)(\/UDTR|UCRD|PURP|FX\/)*/ )
-      get_transaction_field( :udtr, description_string, /\/UDTR\/(.+)(\/UCRD|PURP|FX\/)*/ )
-      get_transaction_field( :ucrd, description_string, /\/UCRD\/(.+)(\/PURP|FX\/)*/ )
-      get_transaction_field( :purp, description_string, /\/PURP\/(.+)(\/FX\/)*/ )
-      get_transaction_field( :fx, description_string, /\/FX\/(.+)/ )
-    end
+      transaction_fields = [
+                            [ '/IBAN/'       , -1 , ' ' ],
+                            [ '/BIC/'        , -1 , ' ' ],
+                            [ '/NAME/'       , -1 , ' ' ],
+                            [ '/RTRN/'       , -1 , ' ' ],
+                            [ '/REMI/'       , -1 , ' ' ],
+                            [ '/EREF/'       , -1 , ' ' ],
+                            [ '/ORDP//ID/'   , -1 , ' ' ],
+                            [ '/BENM//ID/'   , -1 , ' ' ],
+                            [ '/UDTR/'       , -1 , ' ' ],
+                            [ '/UCRD/'       , -1 , ' ' ],
+                            [ '/PURP/'       , -1 , ' ' ],
+                            [ '/FX/'         , -1 , ' ' ],
+                            [ '/PREF/'       , -1 , ' ' ],
+                            [ '/NRTX/'       , -1 , ' ' ],
+                            [ '/IREF/'       , -1 , ' ' ],
+                            [ '/MARF/'       , -1 , ' ' ],
+                            [ '/SVCL/'       , -1 , ' ' ],
+                            [ '/BENM//NAME/' , -1 , ' ' ],
+                            [ '/CSID/'       , -1 , ' ' ],
+                           ]
 
-    def get_transaction_field( key, description, regexp )
-      match_data =  description.match( regexp )
-      @fields[ key ] = match_data[ 1 ] if match_data
-      @fields[ key ] ||= ' '
+      transaction_fields.each do | field |
+        field[ 1 ] = description_string.index( field[ 0 ] )
+        field[ 1 ] ||= -1
+      end
+
+      transaction_fields.sort! {| elem_1, elem_2 | elem_1[ 1 ] <=> elem_2[ 1 ] }
+
+      0.upto( transaction_fields.length - 2) do | index |
+        if transaction_fields[ index ][ 1 ] > -1
+          transaction_fields[ index ][ 2 ] = description_string[ ( transaction_fields[ index ][ 1 ] + transaction_fields[ index ][ 0 ].length ) ... ( transaction_fields[ index + 1 ][ 1 ] ) ]
+        end
+      end
+
+      index = transaction_fields.length - 1
+      transaction_fields[ index ][ 2 ] = description_string[ ( transaction_fields[ index ][ 1 ] + transaction_fields[ index ][ 0 ].length ) .. -1 ]
+
+      transaction_fields.each do | field |
+        key = field[ 0 ].gsub( '/', '').downcase.to_sym
+        @fields[ key ] = field[ 2 ]
+      end
     end
   end
 
