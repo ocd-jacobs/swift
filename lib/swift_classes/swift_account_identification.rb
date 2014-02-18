@@ -5,7 +5,7 @@ module SwiftClasses
   class SwiftAccountIdentification < SwiftLine
     def convert
       @fields[ :tag ] = '25'
-      @fields[ :account_number ] = @raw.slice( 4, 35 )
+      @fields[ :account_identification ] = @raw.slice( 4, 35 )
     end
   end
 

@@ -7,6 +7,7 @@ module SwiftClasses
       descriptions = ''
       swift_86_array.each do |description|
         descriptions += description
+        descriptions += ' '
       end
 
       super( descriptions )

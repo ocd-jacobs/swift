@@ -69,7 +69,7 @@ module SwiftClasses
     end
 
     def transaction_amount( line )
-      BigDecimal.new( line.slice!( /^\d+,\d\d/) )
+      BigDecimal.new( line.slice!( /^\d+,\d\d/).sub( ',', '.') )
     end
 
     def transaction_type( line )
@@ -81,7 +81,7 @@ module SwiftClasses
     end
 
     def servicing_reference( line )
-      if line[ 0 ] = '/'
+      if line[ 0 ] == '/'
         line.slice!( /[^\/]*$/ )
       else
         ' '
@@ -102,16 +102,26 @@ module SwiftClasses
         description_string << description.chomp
       end
       description_string.squeeze(' ')
-      description_string.slice!( /^:86:/ )
 
-      while field = description_string.slice!( /\/\w+\/[^\/]+/ )
-        field = field[ 1 ..-1 ]
-        key = field.slice!( /^\w+/ ).to_sym
-        value = field[ 1 ..-1 ]
-        @fields[ key ] = value
-      end
+      get_transaction_field( :iban, description_string, /\/IBAN\/(.+)\/BIC\// )
+      get_transaction_field( :bic, description_string, /\/BIC\/(.+)\/NAME\// )
+      get_transaction_field( :name, description_string, /\/NAME\/(.+)\/RTRN|REMI|EREF\// )
+      get_transaction_field( :rtrn, description_string, /\/RTRN\/(.+)\/REMI|EREF\// )
+      get_transaction_field( :remi, description_string, /\/REMI\/(.+)\/EREF\// )
+      get_transaction_field( :eref, description_string, /\/EREF\/(.+)(\/ORDP\/\/ID|BENM\/\/ID|UDTR|UCRD|PURP|FX\/)*/ )
+      get_transaction_field( :ordp_id, description_string, /\/ORDP\/\/ID\/(.+)(\/BENM\/\/ID|UDTR|UCRD|PURP|FX\/)*/ )
+      get_transaction_field( :benm_id, description_string, /\/BENM\/\/ID\/(.+)(\/UDTR|UCRD|PURP|FX\/)*/ )
+      get_transaction_field( :udtr, description_string, /\/UDTR\/(.+)(\/UCRD|PURP|FX\/)*/ )
+      get_transaction_field( :ucrd, description_string, /\/UCRD\/(.+)(\/PURP|FX\/)*/ )
+      get_transaction_field( :purp, description_string, /\/PURP\/(.+)(\/FX\/)*/ )
+      get_transaction_field( :fx, description_string, /\/FX\/(.+)/ )
     end
 
+    def get_transaction_field( key, description, regexp )
+      match_data =  description.match( regexp )
+      @fields[ key ] = match_data[ 1 ] if match_data
+      @fields[ key ] ||= ' '
+    end
   end
 
 end
