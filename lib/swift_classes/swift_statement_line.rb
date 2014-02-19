@@ -4,7 +4,7 @@ require_relative 'swift_line'
 module SwiftClasses
 
   class SwiftStatementLine < SwiftLine
-    def initialize( swift_61_string, swift_61_extra_string, swift_86_array )
+    def initialize( swift_61_string, swift_61_extra_string = ' ', swift_86_array = [] )
 
       # ??????????????????????????????????????????????????????????????????????????????
       # Waarom moeten de instance vaiabelen VOOR de call naar super worden aangemaakt?
@@ -32,6 +32,7 @@ module SwiftClasses
       @fields[ :further_reference ]   = further_reference
 
       process_descriptions
+      adjust_owner_reference
     end
 
     def value_date( line )
@@ -97,12 +98,8 @@ module SwiftClasses
     end
 
     def process_descriptions
-      description_string = ''
-      @raw_descriptions.each do |description|
-        description_string << description.chomp
-      end
-      description_string.squeeze(' ')
-
+      description_string = get_description
+      
       transaction_fields = [
                             [ '/IBAN/'       , -1 , ' ' ],
                             [ '/BIC/'        , -1 , ' ' ],
@@ -125,6 +122,20 @@ module SwiftClasses
                             [ '/CSID/'       , -1 , ' ' ],
                            ]
 
+      get_field_values( transaction_fields, description_string )
+      put_field_values( transaction_fields )
+    end
+
+    def get_description
+      description_string = ''
+      @raw_descriptions.each do |description|
+        description_string << description.chomp
+      end
+
+      description_string.squeeze(' ')
+    end
+
+    def get_field_values( transaction_fields, description_string )
       transaction_fields.each do | field |
         field[ 1 ] = description_string.index( field[ 0 ] )
         field[ 1 ] ||= -1
@@ -141,11 +152,16 @@ module SwiftClasses
       index = transaction_fields.length - 1
       transaction_fields[ index ][ 2 ] = description_string[ ( transaction_fields[ index ][ 1 ] + transaction_fields[ index ][ 0 ].length ) .. -1 ]
 
+    end
+
+    def put_field_values( transaction_fields )
       transaction_fields.each do | field |
         key = field[ 0 ].gsub( '/', '').downcase.to_sym
         @fields[ key ] = field[ 2 ]
       end
+    end
 
+    def adjust_owner_reference
       if @fields[ :owner_reference ] == 'EREF'
         @fields[ :owner_reference ] = @fields[ :eref ]
       end
@@ -154,6 +170,7 @@ module SwiftClasses
         @fields[ :owner_reference ] = @fields[ :pref ]
       end
     end
+    
   end
 
 end

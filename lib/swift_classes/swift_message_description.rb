@@ -3,9 +3,9 @@ require_relative 'swift_line'
 module SwiftClasses
   
   class SwiftMessageDescription < SwiftLine
-    def initialize(swift_86_array)
+    def initialize( swift_86_array )
       descriptions = ''
-      swift_86_array.each do |description|
+      swift_86_array.each do | description |
         descriptions += description
         descriptions += ' '
       end
