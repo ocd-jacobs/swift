@@ -1,5 +1,6 @@
 require 'bigdecimal'
 require_relative 'swift_line'
+require_relative 'swift_non_compliant'
 
 module SwiftClasses
 
@@ -31,8 +32,21 @@ module SwiftClasses
 
       @fields[ :further_reference ]   = further_reference
 
-      process_descriptions
-      adjust_owner_reference
+      sepa_codes = ' /PREF/ /IBAN/ /EREF/ /MARF/ '
+      match_data = @raw_descriptions[ 0 ].match( /^:86: *\/([A-Z]+)\// )
+
+      unless match_data.nil?
+        sepa_compliant = sepa_codes.include? match_data[ 1 ]
+      else
+        sepa_compliant = false
+      end
+
+      if sepa_compliant
+        process_descriptions
+        adjust_owner_reference
+      else
+        process_non_compliant
+      end
     end
 
     def value_date( line )
