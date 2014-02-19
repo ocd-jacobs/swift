@@ -145,6 +145,14 @@ module SwiftClasses
         key = field[ 0 ].gsub( '/', '').downcase.to_sym
         @fields[ key ] = field[ 2 ]
       end
+
+      if @fields[ :owner_reference ] == 'EREF'
+        @fields[ :owner_reference ] = @fields[ :eref ]
+      end
+
+      if @fields[ :owner_reference ] == 'PREF'
+        @fields[ :owner_reference ] = @fields[ :pref ]
+      end
     end
   end
 
