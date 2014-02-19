@@ -21,6 +21,8 @@ describe SwiftClasses::SwiftStatementLine do
       line.field( :owner_reference ).should == '561727'
       line.field( :servicing_reference ).should == ' '
 
+      line.field( :further_reference ).should == '/EC-COMPLIANT'
+
       line.field( :iban ).should == 'NL07ABNA0445655682'
       line.field( :bic ).should == 'ABNANL2A'
       line.field( :name ).should == 'INDONESISCH RESTAURANT GAROEDA'
@@ -51,14 +53,16 @@ describe SwiftClasses::SwiftStatementLine do
         line.field( :transaction_type ).should == 'N196'
         line.field( :owner_reference ).should == 'NONREF'
         line.field( :servicing_reference ).should == ' '
-\
+
+        line.field( :further_reference ).should == ' '
+
         line.field( :iban ).should == '11.78.09.357'
-        #line.field( :bic ).should == 'ABNANL2A'
+        line.field( :bic ).should == ' '
         line.field( :name ).should == 'J.M.J. LEMMERLING'
-        #line.field( :rtrn ).should == 'AC01'
+        line.field( :rtrn ).should == ' '
         line.field( :remi ).should == '20104396/VR*95*/LEMMERLING,JMJ'
-        #line.field( :eref ).should == '561727'
-        #line.field( :purp ).should == ' '
+        line.field( :eref ).should == ' '
+        line.field( :purp ).should == ' '
       end
 
       it "converts a line where account number and name are on the same description line - 1 address entry" do
@@ -79,14 +83,16 @@ describe SwiftClasses::SwiftStatementLine do
         line.field( :transaction_type ).should == 'N196'
         line.field( :owner_reference ).should == 'NONREF'
         line.field( :servicing_reference ).should == ' '
-\
+
+        line.field( :further_reference ).should == ' '
+
         line.field( :iban ).should == '38.29.00.014'
-        #line.field( :bic ).should == ' '
+        line.field( :rtrn ).should == ' '
         line.field( :name ).should == 'RABO NEDERLAND SPAARBANK'
-        #line.field( :rtrn ).should == 'AC01'
+        line.field( :ordp_id ).should == ' '
         line.field( :remi ).should == 'OVERBOEKING SALDO EN RENTE OPHEF LLR VALK-OOSTERVELD 29-11-1333.821.808 E.R. VALK-OOSTERVEL'
-        #line.field( :eref ).should == '561727'
-        #line.field( :purp ).should == ' '
+        line.field( :ucrd ).should == ' '
+        line.field( :fx ).should == ' '
       end
 
       it "converts a line where account number and name are not on the same description line" do
@@ -109,13 +115,15 @@ describe SwiftClasses::SwiftStatementLine do
         line.field( :owner_reference ).should == 'NONREF'
         line.field( :servicing_reference ).should == ' '
 
+        line.field( :further_reference ).should == ' '
+
         line.field( :iban ).should == '15.75.30.981'
-        #line.field( :bic ).should == 'ABNANL2A'
+        line.field( :marf ).should == ' '
         line.field( :name ).should == 'LEGER DES HEILS W&G LJ&R'
-        #line.field( :rtrn ).should == 'AC01'
+        line.field( :svcl ).should == ' '
         line.field( :remi ).should == '88002917/040970'
-        #line.field( :eref ).should == '561727'
-        #line.field( :purp ).should == ' '
+        line.field( :benm_name ).should == ' '
+        line.field( :csid ).should == ' '
       end
       
     end

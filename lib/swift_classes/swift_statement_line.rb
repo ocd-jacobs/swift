@@ -32,6 +32,8 @@ module SwiftClasses
 
       @fields[ :further_reference ]   = further_reference
 
+      initialize_transaction_fields
+
       sepa_codes = ' /PREF/ /IBAN/ /EREF/ /MARF/ '
       match_data = @raw_descriptions[ 0 ].match( /^:86: *\/([A-Z]+)\// )
 
@@ -104,7 +106,7 @@ module SwiftClasses
     end
 
     def further_reference
-      if @raw_extra.nil?
+      if @raw_extra.nil? || @raw_extra.empty?
         ' '
       else
         @raw_extra
@@ -133,7 +135,7 @@ module SwiftClasses
                             [ '/MARF/'       , -1 , ' ' ],
                             [ '/SVCL/'       , -1 , ' ' ],
                             [ '/BENM//NAME/' , -1 , ' ' ],
-                            [ '/CSID/'       , -1 , ' ' ],
+                            [ '/CSID/'       , -1 , ' ' ]
                            ]
 
       get_field_values( transaction_fields, description_string )
@@ -182,6 +184,34 @@ module SwiftClasses
 
       if @fields[ :owner_reference ] == 'PREF'
         @fields[ :owner_reference ] = @fields[ :pref ]
+      end
+    end
+
+    def initialize_transaction_fields
+      transaction_fields = [
+                            :iban,
+                            :bic,
+                            :name,
+                            :rtrn,
+                            :remi,
+                            :eref,
+                            :ordp_id,
+                            :benm_id,
+                            :udtr,
+                            :ucrd,
+                            :purp,
+                            :fx,
+                            :pref,
+                            :nrtx,
+                            :iref,
+                            :marf,
+                            :svcl,
+                            :benm_name,
+                            :csid
+                           ]
+
+      transaction_fields.each do | field |
+        @fields[ field ] = ' '
       end
     end
     
