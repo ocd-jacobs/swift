@@ -55,31 +55,20 @@ module SwiftClasses
     end
     
     def iban_begin
-      description_field = @raw_descriptions[ 0 ].sub( /^:86: ?/, '' )
-      @fields[ :iban ] = description_field.slice( /^\w\w\d\d\w\w[^ ]+/ )
+      description_string = get_description.squeeze( ' ' ).sub( /^:86: ?/, '' )
 
-      description_string = get_description.squeeze( ' ' )
+      process_old_swift_format( :iban , description_string )
+      process_old_swift_format( :name , description_string )
+      process_old_swift_format( :remi , description_string )
+      process_old_swift_format( :eref , description_string )
+      process_old_swift_format( :ordp_id , description_string )
 
-      description_string.sub!( /^:86: *\w\w\d\d\w\w[^ ]+ *\) *\( */, '' )
-      match_data =  description_string.match( /^([^)]+)  *\)/ )
-      @fields[ :name ] =  match_data[ 1 ]
-      
-      description_string.sub!( /^[^)]+  *\) *\( */, '' )
-      match_data = description_string.match( /^([^)]+) +\)/ )
-      @fields[ :remi ] = match_data[ 1 ]
+      @fields[ :benm_id ] = description_string.slice( /^[^)]+/ ).strip
+    end
 
-      description_string.sub!( /^[^)]+ +\) *\( */, '' )
-      match_data = description_string.match( /^([^)]+) +\)/ )
-      @fields[ :eref ] = match_data[ 1 ]
-
-      description_string.sub!( /^[^)]+ *\) *\( */, '' )
-      match_data = description_string.match( /^([^)]+) +\)/ )
-      @fields[ :ordp_id ] = match_data[ 1 ]
-      
-      description_string.sub!( /^[^)]+ *\) *\( */, '' )
-      #match_data = description_string.match( /^([^)]+) +\)/ )
-      @fields[ :benm_id ] = description_string
-      
+    def process_old_swift_format( key, description_string )
+      @fields[ key ] = description_string.slice( /^[^)]+/ ).strip
+      description_string.sub!( /^[^)]*\) ?\( ?/, '' )      
     end
     
   end
