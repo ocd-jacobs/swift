@@ -7,8 +7,8 @@ module SwiftClasses
       when /^\d\d\./ then bank_account_begin     # regel begint met twee cijfers en een punt
         
 #      when /^\d+/                                               # regel begint met cijfer
-#      when /^\w\w\d\d\w\w/                                      # regel begnt met IBAN nummer
-#      when /^GIRO/
+      when /^\w\w\d\d\w\w/ then iban_begin       # regel begnt met IBAN nummer
+      when /^GIRO/ then giro_account_begin       # regel begint met GIRO
 #      when /^ZEROBALANCING/
 #      when /^NONREF/
 #      when /^ONZE REF/
@@ -21,7 +21,16 @@ module SwiftClasses
     end
 
     def bank_account_begin
-      description_field = @raw_descriptions[ 0 ].sub( /^:86: ?/, '' ) 
+      description_field = @raw_descriptions[ 0 ].sub( /^:86: ?/, '' )
+      account_begin( description_field )
+    end
+
+    def giro_account_begin
+      description_field = @raw_descriptions[ 0 ].sub( /^:86: ?GIRO +/, '' )
+      account_begin( description_field )
+    end
+
+    def account_begin( description_field )
       @fields[ :iban ] = description_field.slice(/^[^ ]+/)
       @fields[ :name ] = description_field.sub( /^[^ ]+/, '' ).strip
 
@@ -43,6 +52,34 @@ module SwiftClasses
       
       @fields[ :remi ].strip!
       @fields[ :remi ].squeeze!( ' ' )
+    end
+    
+    def iban_begin
+      description_field = @raw_descriptions[ 0 ].sub( /^:86: ?/, '' )
+      @fields[ :iban ] = description_field.slice( /^\w\w\d\d\w\w[^ ]+/ )
+
+      description_string = get_description.squeeze( ' ' )
+
+      description_string.sub!( /^:86: *\w\w\d\d\w\w[^ ]+ *\) *\( */, '' )
+      match_data =  description_string.match( /^([^)]+)  *\)/ )
+      @fields[ :name ] =  match_data[ 1 ]
+      
+      description_string.sub!( /^[^)]+  *\) *\( */, '' )
+      match_data = description_string.match( /^([^)]+) +\)/ )
+      @fields[ :remi ] = match_data[ 1 ]
+
+      description_string.sub!( /^[^)]+ +\) *\( */, '' )
+      match_data = description_string.match( /^([^)]+) +\)/ )
+      @fields[ :eref ] = match_data[ 1 ]
+
+      description_string.sub!( /^[^)]+ *\) *\( */, '' )
+      match_data = description_string.match( /^([^)]+) +\)/ )
+      @fields[ :ordp_id ] = match_data[ 1 ]
+      
+      description_string.sub!( /^[^)]+ *\) *\( */, '' )
+      #match_data = description_string.match( /^([^)]+) +\)/ )
+      @fields[ :benm_id ] = description_string
+      
     end
     
   end
