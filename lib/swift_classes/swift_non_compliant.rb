@@ -4,17 +4,15 @@ module SwiftClasses
       description = @raw_descriptions[ 0 ].sub( /^:86: ?/, '' )
       
       case description
-      when /^\d\d\./ then bank_account_begin     # regel begint met twee cijfers en een punt
-        
-#      when /^\d+/                                               # regel begint met cijfer
-      when /^\w\w\d\d\w\w/ then pre_2014_sepa       # regel begnt met IBAN nummer
-      when /^GIRO/ then giro_account_begin       # regel begint met GIRO
-#      when /^ZEROBALANCING/
+      when /^\d\d\./ then bank_account_begin                # regel begint met twee cijfers en een punt
+      when /^[A-Z]{2}\d\d[A-Z]{2}/ then pre_2014_sepa       # regel begnt met IBAN nummer
+      when /^GIRO/ then giro_account_begin                  # regel begint met GIRO
+      when /^ZEROBALANCING/ then zero_balancing
+      when /^\d{16}/ then payments_received
 #      when /^NONREF/
 #      when /^ONZE REF/
-#      when /^COR ST2/
-#      when /^[A-Z]/                                          # regel begint met letter
-#      when /^\/PREF\//                                       # regel begint met /PREF/
+      when /^COR +ST2/ then sepa_payments_received
+#      when /^[A-Z]/                                        # regel begint met letter
 #      else
 
       end
@@ -66,6 +64,52 @@ module SwiftClasses
         @fields[ keys[ index ] ] = ' ' if @fields[ keys[ index ] ].empty?
       end
     end
-    
+
+    def zero_balancing
+      description_string = get_description.squeeze( ' ' ).sub( /^:86: ?/, '' )
+
+      md = description_string.match( /AND (\d+)/ )
+      
+      @fields[ :iban ] = md[ 1 ]
+      @fields[ :remi ] = description_string
+      
+    end
+
+    def payments_received
+      remi = @raw_descriptions.clone
+      remi[0].sub!( /^:86: ?/, '' )
+
+      if @raw_descriptions[ 1 ][ 0 ] == '/'
+        md = @raw_descriptions[ 1 ].match( /^\/([^ ]+) +([^ ].*)$/ )
+
+        @fields[ :iban ] = md[ 1 ]
+        @fields[ :name ] = md[ 2 ]
+
+        remi.delete_at( 1 )
+      else
+        @fields[ :iban ] = @raw_descriptions[ 2 ][ 1 .. -1 ]
+        @fields[ :name ] = @raw_descriptions[ 3 ]
+
+        remi.delete_at( 3 )
+        remi.delete_at( 2 )
+      end
+
+      @fields[ :remi ] = ''
+      remi.each do | description |
+        @fields[ :remi ] << description.squeeze( ' ' )
+      end
+    end
+
+    # ***** REFACTOR *****
+    # move to swift_statement_line
+    def sepa_payments_received
+      raw_original = @raw_descriptions.clone
+      @raw_descriptions.delete_at( 0 )
+
+      process_descriptions
+      adjust_owner_reference
+
+      @raw_descriptions = raw_original
+    end
   end
 end

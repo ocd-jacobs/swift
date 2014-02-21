@@ -11,6 +11,7 @@ describe SwiftClasses::SwiftStatementLine do
                                                     ' GAROEDA/RTRN/AC01/REMI/561727 31420/315276 31420/315276 LUNCH/DI',
                                                     'NER 03-10-13/EREF/561727'
                                                    ] )
+
       line.field( :tag ).should == '61'
       line.field( :value_date ).should == '131017'
       line.field( :entry_date ).should == '1017'
@@ -44,6 +45,7 @@ describe SwiftClasses::SwiftStatementLine do
                                                       '6271 CK  GULPEN',
                                                       '20104396/VR*95*/LEMMERLING,JMJ'
                                                      ] )
+
         line.field( :tag ).should == '61'
         line.field( :value_date ).should == '130102'
         line.field( :entry_date ).should == '0102'
@@ -74,17 +76,6 @@ describe SwiftClasses::SwiftStatementLine do
                                                       'OVERBOEKING SALDO EN RENTE       OPHEF LLR VALK-OOSTERVELD 29-11-',
                                                       '1333.821.808 E.R. VALK-OOSTERVEL'
                                                      ] )
-        line.field( :tag ).should == '61'
-        line.field( :value_date ).should == '130311'
-        line.field( :entry_date ).should == '0311'
-        line.field( :d_c ).should == 'C'
-        line.field( :funds_code ).should == ' '
-        line.field( :transaction_amount ).should == 23.50
-        line.field( :transaction_type ).should == 'N196'
-        line.field( :owner_reference ).should == 'NONREF'
-        line.field( :servicing_reference ).should == ' '
-
-        line.field( :further_reference ).should == ' '
 
         line.field( :iban ).should == '38.29.00.014'
         line.field( :rtrn ).should == ' '
@@ -105,17 +96,6 @@ describe SwiftClasses::SwiftStatementLine do
                                                       '3500 GB  UTRECHT',
                                                       '88002917/040970'
                                                      ] )
-        line.field( :tag ).should == '61'
-        line.field( :value_date ).should == '130103'
-        line.field( :entry_date ).should == '0103'
-        line.field( :d_c ).should == 'C'
-        line.field( :funds_code ).should == ' '
-        line.field( :transaction_amount ).should == 170038.00
-        line.field( :transaction_type ).should == 'N196'
-        line.field( :owner_reference ).should == 'NONREF'
-        line.field( :servicing_reference ).should == ' '
-
-        line.field( :further_reference ).should == ' '
 
         line.field( :iban ).should == '15.75.30.981'
         line.field( :marf ).should == ' '
@@ -135,17 +115,6 @@ describe SwiftClasses::SwiftStatementLine do
                                                       'BETALINGSKENM.  0748083495959370 200009439120914',
                                                       '200009439120914                  CREDITFACTUUR'
                                                      ] )
-        line.field( :tag ).should == '61'
-        line.field( :value_date ).should == '130102'
-        line.field( :entry_date ).should == '0102'
-        line.field( :d_c ).should == 'C'
-        line.field( :funds_code ).should == ' '
-        line.field( :transaction_amount ).should == 6246.44
-        line.field( :transaction_type ).should == 'N196'
-        line.field( :owner_reference ).should == '0748083495959370'
-        line.field( :servicing_reference ).should == ' '
-
-        line.field( :further_reference ).should == ' '
 
         line.field( :iban ).should == '500399'
         line.field( :name ).should == 'KPN BV ADM 160 VASTE VER'
@@ -163,17 +132,6 @@ describe SwiftClasses::SwiftStatementLine do
                                                     '                                                     )(381981    ',
                                                     '                         )(                                   )(W'
                                                    ] )
-      line.field( :tag ).should == '61'
-      line.field( :value_date ).should == '130527'
-      line.field( :entry_date ).should == '0527'
-      line.field( :d_c ).should == 'C'
-      line.field( :funds_code ).should == ' '
-      line.field( :transaction_amount ).should == 115.59
-      line.field( :transaction_type ).should == 'N658'
-      line.field( :owner_reference ).should == 'NONREF'
-      line.field( :servicing_reference ).should == ' '
-
-      line.field( :further_reference ).should == ' '
 
       line.field( :iban ).should == 'NL55RBOS0569989760'
       line.field( :name ).should == '418-RECHTBANK OOST-NEDERLAND'
@@ -181,6 +139,90 @@ describe SwiftClasses::SwiftStatementLine do
       line.field( :eref ).should == '381981'
       line.field( :ordp_id ).should == ' '
       line.field( :benm_id ).should == 'W' 
+    end
+
+    it "converts ZEROBALANCING lines" do
+      line = SwiftClasses::SwiftStatementLine.new( ':61:1310091009C150611962,99N556ZERO BALANCING S',
+                                                   '',
+                                                   [
+                                                    ':86:ZEROBALANCING',
+                                                    'BETWEEN 0569989000 EUR',
+                                                    'AND 0569988780 EUR'
+                                                   ] )
+
+      line.field( :iban ).should == '0569988780'
+      line.field( :name ).should == ' '
+      line.field( :remi ).should == 'ZEROBALANCINGBETWEEN 0569989000 EURAND 0569988780 EUR'
+    end
+
+    it "converts payment received lines in the new format" do
+      line = SwiftClasses::SwiftStatementLine.new( ':61:1312231223D1090,21N77801540441995642',
+                                                   '',
+                                                   [
+                                                    ':86:2013122300004653                 BETAALD EUR           1.090,21',
+                                                    '/502-282-7                       JAMES BONTA',
+                                                    '()441995642 655859 2013 11 26 BO NTAREIS EN VER BLIJFSKOSTEN J BO',
+                                                    'NTASYMPOSIUM 26 11 2013          UW REF.   01540441995642'
+                                                   ] )
+
+      line.field( :iban ).should == '502-282-7'
+      line.field( :name ).should == 'JAMES BONTA'
+      line.field( :remi ).should == '2013122300004653 BETAALD EUR 1.090,21()441995642 655859 2013 11 26 BO NTAREIS EN VER BLIJFSKOSTEN J BONTASYMPOSIUM 26 11 2013 UW REF. 01540441995642'
+    end
+
+    it "converts payment received lines in the old format" do
+      line = SwiftClasses::SwiftStatementLine.new( ':61:1301080108D3570,60N785NONREF',
+                                                   '',
+                                                   [
+                                                    ':86:2013010800002904',
+                                                    'BETAALD EUR           3.570,60',
+                                                    '/AT065700052011022484', 
+                                                    'BUNDESMINISTERIUM FUER INNERES',
+                                                    'DEB 000017/83436, 83209',
+                                                    'MINUS KOSTEN CONFORM AFSPRAAK'
+                                                   ] )
+
+      line.field( :iban ).should == 'AT065700052011022484'
+      line.field( :name ).should == 'BUNDESMINISTERIUM FUER INNERES'
+      line.field( :remi ).should == '2013010800002904BETAALD EUR 3.570,60DEB 000017/83436, 83209MINUS KOSTEN CONFORM AFSPRAAK'
+    end
+
+    it "converts properly formatted SEPA compliant payments received" do
+      line = SwiftClasses::SwiftStatementLine.new( ':61:1312181218D381,44N307MARF',
+                                                   '',
+                                                   [
+                                                    ':86:COR                                ST2',
+                                                    '     /MARF/18002327                     /SVCL/SEPA',
+                                                    '          /BENM//NAME/LOYALIS MAATWERK ADMINIS',
+                                                    '               /REMI/20131101                     /CSID/NL74LOY14',
+                                                    '0657690000          /IBAN/NL61ABNA0421650702           /PURP/OTHR'
+                                                   ] )
+
+      line.field( :tag ).should == '61'
+      line.field( :value_date ).should == '131218'
+      line.field( :entry_date ).should == '1218'
+      line.field( :d_c ).should == 'D'
+      line.field( :funds_code ).should == ' '
+      line.field( :transaction_amount ).should == 381.44
+      line.field( :transaction_type ).should == 'N307'
+      line.field( :owner_reference ).should == 'MARF'
+      line.field( :servicing_reference ).should == ' '
+
+      line.field( :further_reference ).should == ' '
+
+      # ***** REFACTOR *****
+      # trailing spaces not consistent
+      line.field( :iban ).should == 'NL61ABNA0421650702 '
+      line.field( :bic ).should == ' '
+      line.field( :name ).should == ' ' 
+      line.field( :rtrn ).should == ' '
+      line.field( :remi ).should == '20131101 '
+      line.field( :eref ).should == ' '
+      line.field( :purp ).should == 'OTHR'
+      line.field( :svcl ).should == 'SEPA '
+      line.field( :marf ).should == '18002327 '
+      line.field( :benm_name ).should == 'LOYALIS MAATWERK ADMINIS '
+      line.field( :csid ).should == 'NL74LOY140657690000 '
     end
 
   end

@@ -153,8 +153,17 @@ module SwiftClasses
 
     def get_field_values( transaction_fields, description_string )
       transaction_fields.each do | field |
+        
         field[ 1 ] = description_string.index( field[ 0 ] )
         field[ 1 ] ||= -1
+
+        # ***** REFACTOR *****
+        # /NAME/ wordt ook gevonden in key /BENM//NAME/ !!!
+        if field[ 0 ] == '/NAME/'
+          if description_string =~ /\/BENM\/\/NAME\//
+            field[ 1 ] = -1
+          end
+        end
       end
 
       transaction_fields.sort! {| elem_1, elem_2 | elem_1[ 1 ] <=> elem_2[ 1 ] }
@@ -167,11 +176,13 @@ module SwiftClasses
 
       index = transaction_fields.length - 1
       transaction_fields[ index ][ 2 ] = description_string[ ( transaction_fields[ index ][ 1 ] + transaction_fields[ index ][ 0 ].length ) .. -1 ]
-
     end
 
     def put_field_values( transaction_fields )
       transaction_fields.each do | field |
+        
+        # ***** REFACTOR *****
+        field[ 0 ].sub!( '//', '_')
         key = field[ 0 ].gsub( '/', '').downcase.to_sym
         @fields[ key ] = field[ 2 ]
       end
