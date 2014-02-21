@@ -7,7 +7,7 @@ module SwiftClasses
       when /^\d\d\./ then bank_account_begin     # regel begint met twee cijfers en een punt
         
 #      when /^\d+/                                               # regel begint met cijfer
-      when /^\w\w\d\d\w\w/ then iban_begin       # regel begnt met IBAN nummer
+      when /^\w\w\d\d\w\w/ then pre_2014_sepa       # regel begnt met IBAN nummer
       when /^GIRO/ then giro_account_begin       # regel begint met GIRO
 #      when /^ZEROBALANCING/
 #      when /^NONREF/
@@ -54,21 +54,17 @@ module SwiftClasses
       @fields[ :remi ].squeeze!( ' ' )
     end
     
-    def iban_begin
+    def pre_2014_sepa
       description_string = get_description.squeeze( ' ' ).sub( /^:86: ?/, '' )
 
-      process_old_swift_format( :iban , description_string )
-      process_old_swift_format( :name , description_string )
-      process_old_swift_format( :remi , description_string )
-      process_old_swift_format( :eref , description_string )
-      process_old_swift_format( :ordp_id , description_string )
+      md = description_string.match( /^([^)]+) ?\) ?\( ?([^)]+) ?\) ?\( ?([^)]+) ?\) ?\( ?([^)]+) ?\) ?\( ?([^)]+) ?\) ?\( ?([^)]+)/ )
 
-      @fields[ :benm_id ] = description_string.slice( /^[^)]+/ ).strip
-    end
-
-    def process_old_swift_format( key, description_string )
-      @fields[ key ] = description_string.slice( /^[^)]+/ ).strip
-      description_string.sub!( /^[^)]*\) ?\( ?/, '' )      
+      keys = [ nil, :iban, :name, :remi, :eref, :ordp_id, :benm_id ]
+      
+      1.upto( 6 ) do | index |
+        @fields[ keys[ index ] ] = md[ index ].strip
+        @fields[ keys[ index ] ] = ' ' if @fields[ keys[ index ] ].empty?
+      end
     end
     
   end

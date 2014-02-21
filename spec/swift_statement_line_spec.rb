@@ -153,7 +153,7 @@ describe SwiftClasses::SwiftStatementLine do
       end
     end
 
-    it "description starts with an IBAN number" do
+    it "description starts with an IBAN number (pre februari 2014 SEPA)" do
       line = SwiftClasses::SwiftStatementLine.new( ':61:1305270527C115,59N658NONREF',
                                                    '',
                                                    [
@@ -161,7 +161,7 @@ describe SwiftClasses::SwiftStatementLine do
                                                     '                                         )(381981 LEVENSLOOPTEGOE',
                                                     'D SAP 20037965 JH VAN BREDA RB OOST NL                           ',
                                                     '                                                     )(381981    ',
-                                                    '                         )(       Q                           )(W'
+                                                    '                         )(                                   )(W'
                                                    ] )
       line.field( :tag ).should == '61'
       line.field( :value_date ).should == '130527'
@@ -179,7 +179,7 @@ describe SwiftClasses::SwiftStatementLine do
       line.field( :name ).should == '418-RECHTBANK OOST-NEDERLAND'
       line.field( :remi ).should == '381981 LEVENSLOOPTEGOED SAP 20037965 JH VAN BREDA RB OOST NL'
       line.field( :eref ).should == '381981'
-      line.field( :ordp_id ).should == 'Q'
+      line.field( :ordp_id ).should == ' '
       line.field( :benm_id ).should == 'W' 
     end
 
