@@ -210,21 +210,122 @@ describe SwiftClasses::SwiftStatementLine do
 
       line.field( :further_reference ).should == ' '
 
-      # ***** REFACTOR *****
-      # trailing spaces not consistent
-      line.field( :iban ).should == 'NL61ABNA0421650702 '
+      line.field( :iban ).should == 'NL61ABNA0421650702'
       line.field( :bic ).should == ' '
       line.field( :name ).should == ' ' 
       line.field( :rtrn ).should == ' '
-      line.field( :remi ).should == '20131101 '
+      line.field( :remi ).should == '20131101'
       line.field( :eref ).should == ' '
       line.field( :purp ).should == 'OTHR'
-      line.field( :svcl ).should == 'SEPA '
-      line.field( :marf ).should == '18002327 '
-      line.field( :benm_name ).should == 'LOYALIS MAATWERK ADMINIS '
-      line.field( :csid ).should == 'NL74LOY140657690000 '
+      line.field( :svcl ).should == 'SEPA'
+      line.field( :marf ).should == '18002327'
+      line.field( :benm_name ).should == 'LOYALIS MAATWERK ADMINIS'
+      line.field( :csid ).should == 'NL74LOY140657690000'
     end
 
+    it "converts lines starting with a foreign bank account number" do 
+      line = SwiftClasses::SwiftStatementLine.new( ':61:1301310131C678,27N654EREF',
+                                                   '',
+                                                   [
+                                                    ":86:FR7630003023600015001718672       )(CONSEIL DE L 'EUROPE",
+                                                    "                                         )(ALBAYRAK NUR 2012-11-2",
+                                                    "9 09:00 - 2012-11-30 13:30 : CONFERENCE ROLE OF INTERNATIONAL COO",
+                                                    "PERATION IN TACKLING SEXUAL VIOLENCE AGAINST CHILDREN)(SEPA 14 13",
+                                                    " PAY 2013-01-29-22-15-04-)(                                   )"
+                                                   ] )
+
+      line.field( :tag ).should == '61'
+      line.field( :value_date ).should == '130131'
+      line.field( :entry_date ).should == '0131'
+      line.field( :d_c ).should == 'C'
+      line.field( :funds_code ).should == ' '
+      line.field( :transaction_amount ).should == 678.27
+      line.field( :transaction_type ).should == 'N654'
+      line.field( :owner_reference ).should == 'EREF'
+      line.field( :servicing_reference ).should == ' '
+
+      line.field( :further_reference ).should == ' '
+
+      line.field( :iban ).should == 'FR7630003023600015001718672'
+      line.field( :bic ).should == ' '
+      line.field( :name ).should == "CONSEIL DE L 'EUROPE"
+      line.field( :rtrn ).should == ' '
+      line.field( :remi ).should == 'ALBAYRAK NUR 2012-11-29 09:00 - 2012-11-30 13:30 : CONFERENCE ROLE OF INTERNATIONAL COOPERATION IN TACKLING SEXUAL VIOLENCE AGAINST CHILDREN'
+      line.field( :eref ).should == 'SEPA 14 13 PAY 2013-01-29-22-15-04-'
+      line.field( :purp ).should == ' '
+      line.field( :svcl ).should == ' '
+      line.field( :marf ).should == ' '
+      line.field( :benm_name ).should == ' '
+      line.field( :csid ).should == ' '
+    end
+
+    it "converts batch payments - TOTAAL" do      
+      line = SwiftClasses::SwiftStatementLine.new( ':61:1302040204D285413,03N196NONREF',
+                                                   '',
+                                                   [
+                                                    ':86:TOTAAL BETALINGEN',
+                                                    'VOOR COMPRIMEREN      124 POSTEN',
+                                                    'LAATSTE 5 POS SOM REKNRS  85.771'
+                                                   ] )
+
+      line.field( :iban ).should == ' '
+      line.field( :bic ).should == ' '
+      line.field( :name ).should == ' '
+      line.field( :rtrn ).should == ' '
+      line.field( :remi ).should == 'TOTAAL BETALINGENVOOR COMPRIMEREN 124 POSTENLAATSTE 5 POS SOM REKNRS 85.771'
+      line.field( :eref ).should == ' ' 
+      line.field( :purp ).should == ' '
+      line.field( :svcl ).should == ' '
+      line.field( :marf ).should == ' '
+      line.field( :benm_name ).should == ' '
+      line.field( :csid ).should == ' '
+    end
+    
+    it "converts deposits" do
+      line = SwiftClasses::SwiftStatementLine.new( ':61:1307040704C5000,00N41300000076',
+                                                   '',
+                                                   [
+                                                    ':86:GESTORT DOOR FILIAAL NR. DFEZFIA   AFSTORTEN KAS',
+                                                    '     SEALBAGNUMMER:00000076             STORTING BIJ G.C. CAPELLE'
+                                                   ] )
+
+      line.field( :name ).should == ' '
+      line.field( :rtrn ).should == ' '
+      line.field( :remi ).should == 'GESTORT DOOR FILIAAL NR. DFEZFIA AFSTORTEN KAS SEALBAGNUMMER:00000076 STORTING BIJ G.C. CAPELLE'
+      line.field( :eref ).should == ' ' 
+      line.field( :csid ).should == ' '
+    end
+    
+    it "converts batch payments - NONREF" do      
+      line = SwiftClasses::SwiftStatementLine.new( ':61:1303120312D147476397,31N655NONREF',
+                                                   '',
+                                                   [
+                                                    ':86:NONREF                             )(',
+                                                    'TOTAL NUMBERS OF TRANSACTIONS : 0000013'
+                                                   ] )
+
+      line.field( :iban ).should == ' '
+      line.field( :remi ).should == 'NONREF )(TOTAL NUMBERS OF TRANSACTIONS : 0000013'
+      line.field( :eref ).should == ' ' 
+    end
+    
+    it "converts non specified lines by specifying tag86 under remittance information" do
+      line = SwiftClasses::SwiftStatementLine.new( ':61:1303220322C32371,00N792NONREF',
+                                                   '',
+                                                   [
+                                                    ':86:ONZE REF     2013032200182281   OORSPR.      GBP        28283,97',
+                                                    'KOERS BTL (EUR/GBP)    1,1445000ONTV RBS     EUR        32371,00',
+                                                    'ALLE KOSTEN T.L.V. OPDRACHTGEVERASSOCIATION OF CHIEF POLICE',
+                                                    'OFFICERS  1ST FLOOR             10 VICTORIA STREET',
+                                                    'LONDON  SW1H 0NN                ISDEP PAYMT 1',
+                                                    'ISDEP - EC PRE FINANCING GRANT  PAYMENT'
+                                                   ] )
+
+      line.field( :iban ).should == ' '
+      line.field( :remi ).should == 'ONZE REF 2013032200182281 OORSPR. GBP 28283,97KOERS BTL (EUR/GBP) 1,1445000ONTV RBS EUR 32371,00ALLE KOSTEN T.L.V. OPDRACHTGEVERASSOCIATION OF CHIEF POLICEOFFICERS 1ST FLOOR 10 VICTORIA STREETLONDON SW1H 0NN ISDEP PAYMT 1ISDEP - EC PRE FINANCING GRANT PAYMENT'
+      line.field( :eref ).should == ' ' 
+    end
+    
   end
 end
 

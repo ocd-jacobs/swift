@@ -117,25 +117,25 @@ module SwiftClasses
       description_string = get_description
       
       transaction_fields = [
-                            [ '/IBAN/'       , -1 , ' ' ],
-                            [ '/BIC/'        , -1 , ' ' ],
-                            [ '/NAME/'       , -1 , ' ' ],
-                            [ '/RTRN/'       , -1 , ' ' ],
-                            [ '/REMI/'       , -1 , ' ' ],
-                            [ '/EREF/'       , -1 , ' ' ],
-                            [ '/ORDP//ID/'   , -1 , ' ' ],
-                            [ '/BENM//ID/'   , -1 , ' ' ],
-                            [ '/UDTR/'       , -1 , ' ' ],
-                            [ '/UCRD/'       , -1 , ' ' ],
-                            [ '/PURP/'       , -1 , ' ' ],
-                            [ '/FX/'         , -1 , ' ' ],
-                            [ '/PREF/'       , -1 , ' ' ],
-                            [ '/NRTX/'       , -1 , ' ' ],
-                            [ '/IREF/'       , -1 , ' ' ],
-                            [ '/MARF/'       , -1 , ' ' ],
-                            [ '/SVCL/'       , -1 , ' ' ],
-                            [ '/BENM//NAME/' , -1 , ' ' ],
-                            [ '/CSID/'       , -1 , ' ' ]
+                            [ '/IBAN/'       , -1 , ' ', :iban ],
+                            [ '/BIC/'        , -1 , ' ', :bic ],
+                            [ '/NAME/'       , -1 , ' ', :name ],
+                            [ '/RTRN/'       , -1 , ' ', :rtrn ],
+                            [ '/REMI/'       , -1 , ' ', :remi ],
+                            [ '/EREF/'       , -1 , ' ', :eref ],
+                            [ '/ORDP//ID/'   , -1 , ' ', :ordp_id ],
+                            [ '/BENM//ID/'   , -1 , ' ', :benm_id ],
+                            [ '/UDTR/'       , -1 , ' ', :udtr ],
+                            [ '/UCRD/'       , -1 , ' ', :ucrd ],
+                            [ '/PURP/'       , -1 , ' ', :purp ],
+                            [ '/FX/'         , -1 , ' ', :fx ],
+                            [ '/PREF/'       , -1 , ' ', :pref ],
+                            [ '/NRTX/'       , -1 , ' ', :nrtx ],
+                            [ '/IREF/'       , -1 , ' ', :iref ],
+                            [ '/MARF/'       , -1 , ' ', :marf ],
+                            [ '/SVCL/'       , -1 , ' ', :svcl ],
+                            [ '/BENM//NAME/' , -1 , ' ', :benm_name ],
+                            [ '/CSID/'       , -1 , ' ', :csid ]
                            ]
 
       get_field_values( transaction_fields, description_string )
@@ -157,8 +157,7 @@ module SwiftClasses
         field[ 1 ] = description_string.index( field[ 0 ] )
         field[ 1 ] ||= -1
 
-        # ***** REFACTOR *****
-        # /NAME/ wordt ook gevonden in key /BENM//NAME/ !!!
+        # /NAME/ also found in key /BENM//NAME/ !!!
         if field[ 0 ] == '/NAME/'
           if description_string =~ /\/BENM\/\/NAME\//
             field[ 1 ] = -1
@@ -180,11 +179,8 @@ module SwiftClasses
 
     def put_field_values( transaction_fields )
       transaction_fields.each do | field |
-        
-        # ***** REFACTOR *****
-        field[ 0 ].sub!( '//', '_')
-        key = field[ 0 ].gsub( '/', '').downcase.to_sym
-        @fields[ key ] = field[ 2 ]
+        field[ 2 ].strip! unless field[ 2 ] == ' '
+        @fields[ field[ 3 ] ] = field[ 2 ]
       end
     end
 

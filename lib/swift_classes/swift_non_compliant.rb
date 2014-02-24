@@ -5,16 +5,17 @@ module SwiftClasses
       
       case description
       when /^\d\d\./ then bank_account_begin                # regel begint met twee cijfers en een punt
-      when /^[A-Z]{2}\d\d[A-Z]{2}/ then pre_2014_sepa       # regel begnt met IBAN nummer
+      when /^[A-Z]{2}\d{2}[A-Z]{2}/ then pre_2014_sepa      # regel begnt met IBAN nummer
+      when /^[A-Z]{2}\d{2}/ then foreign_account            # regel beterft waarschijnlijk een buitenlands rekening nummer
       when /^GIRO/ then giro_account_begin                  # regel begint met GIRO
       when /^ZEROBALANCING/ then zero_balancing
+      when /^TOTAAL BETALINGEN/ then batch_payment
+      when /^GESTORT DOOR/ then deposit
+      when /^NONREF/ then batch_payment
       when /^\d{16}/ then payments_received
-#      when /^NONREF/
-#      when /^ONZE REF/
       when /^COR +ST2/ then sepa_payments_received
-#      when /^[A-Z]/                                        # regel begint met letter
-#      else
-
+      else
+        no_specification
       end
     end
 
@@ -100,8 +101,6 @@ module SwiftClasses
       end
     end
 
-    # ***** REFACTOR *****
-    # move to swift_statement_line
     def sepa_payments_received
       raw_original = @raw_descriptions.clone
       @raw_descriptions.delete_at( 0 )
@@ -110,6 +109,32 @@ module SwiftClasses
       adjust_owner_reference
 
       @raw_descriptions = raw_original
+    end
+
+    def foreign_account     
+      description_string = get_description.squeeze( ' ' ).sub( /^:86: ?/, '' )
+
+      md = description_string.match( /^([^)]+) ?\) ?\( ?([^)]+) ?\) ?\( ?([^)]+) ?\) ?\( ?([^)]+) ?\) ?\( ?([^)]+) ?\)/ )
+
+      keys = [ nil, :iban, :name, :remi, :eref, :ordp_id ]
+      
+      1.upto( 5 ) do | index |
+        @fields[ keys[ index ] ] = md[ index ].strip
+        @fields[ keys[ index ] ] = ' ' if @fields[ keys[ index ] ].empty?
+      end
+    end
+
+    def no_specification
+      description_string = get_description.squeeze( ' ' ).sub( /^:86: ?/, '' )
+      @fields[ :remi ] = description_string
+    end
+    
+    def batch_payment
+      no_specification
+    end
+
+    def deposit
+      no_specification
     end
   end
 end
