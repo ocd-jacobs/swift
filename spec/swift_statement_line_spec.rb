@@ -106,6 +106,23 @@ describe SwiftClasses::SwiftStatementLine do
         line.field( :csid ).should == ' '
       end
       
+      it "converts a line where account number and name are on the same description line - no address entry" do
+        line = SwiftClasses::SwiftStatementLine.new( ':61:1301150115D145782338,00N196NONREF',
+                                                     '',
+                                                     [
+                                                      ':86: 28.51.55.741 NATIONALE POLITIE',
+                                                      '1E KWARTAAL BETALING'
+                                                    ] )
+
+        line.field( :iban ).should == '28.51.55.741'
+        line.field( :rtrn ).should == ' '
+        line.field( :name ).should == 'NATIONALE POLITIE'
+        line.field( :ordp_id ).should == ' '
+        line.field( :remi ).should == '1E KWARTAAL BETALING'
+        line.field( :ucrd ).should == ' '
+        line.field( :fx ).should == ' '
+      end
+
       it "converts a line starting with 'GIRO' where account number and name are on the same description line - 1 address entry" do
         line = SwiftClasses::SwiftStatementLine.new( ':61:1301020102C6246,44N1960748083495959370',
                                                      '',

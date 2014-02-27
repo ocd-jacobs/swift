@@ -77,9 +77,14 @@ module SwiftClasses
         @swift_61_extra_string = ''
         @swift_86_array = []
       elsif tag =~ /86/
+        @swift_61_extra_string = ' ' if @swift_61_extra_string.empty?
         @swift_86_array << line
       else
-        @swift_61_extra_string = line
+        if @swift_86_array.empty?
+          @swift_61_extra_string = line
+        else
+          @swift_86_array << line
+        end
       end
       
     end

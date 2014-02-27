@@ -13,4 +13,4 @@ require_relative 'swift_classes/swift_message_description'         # tag :86:
 require_relative 'swift_classes/swift_message_trailer'             # message trailer
 
 require_relative 'swift_classes/swift_message'                     # swift message
-require_relative 'swift_classes/swift_file'                        # swift file
+#require_relative 'swift_classes/swift_file'                        # swift file

@@ -33,19 +33,26 @@ module SwiftClasses
       @fields[ :iban ] = description_field.slice(/^[^ ]+/)
       @fields[ :name ] = description_field.sub( /^[^ ]+/, '' ).strip
 
-      start_remi = 3
-
+      remi_start = 3       # account and name on the same line - 2 address entries
+      
       if @fields[ :name ].strip == ''
         @fields[ :name ] = @raw_descriptions[ 1 ].strip
-        start_remi = 4
+        remi_start = 4     # account and name on different lines - 2 address entries
       else
         if description_field.strip.length - description_field.strip.squeeze( ' ' ).length >= 15
-          start_remi = 2
+          remi_start = 2   # account and name on the same line - 1 address entry
         end
       end
-      
+
+      line_count = @raw_descriptions.size
+
+      case line_count
+      when 2 then remi_start = 1     # account and name on the same line - no address entries
+      when 3 then remi_start = 2     # account and name on the same line - 2 address entries
+      end
+
       @fields[ :remi ] = ''
-      @raw_descriptions[ start_remi .. -1 ].each do | description |
+      @raw_descriptions[ remi_start .. -1 ].each do | description |
         @fields[ :remi ] << description
       end
       
@@ -54,13 +61,21 @@ module SwiftClasses
     end
     
     def pre_2014_sepa
+
       description_string = get_description.squeeze( ' ' ).sub( /^:86: ?/, '' )
 
-      md = description_string.match( /^([^)]+) ?\) ?\( ?([^)]+) ?\) ?\( ?([^)]+) ?\) ?\( ?([^)]+) ?\) ?\( ?([^)]+) ?\) ?\( ?([^)]+)/ )
+      md = description_string.match(/(.+)\)\((.+)\)\((.+)\)\((.+)\)\(([^)]+)\)\(([^)]+)/)
+      keys_end = 6
+      
+      unless md
+        md = description_string.match(/(.+)\)\((.+)\)\((.+)\)\((.+)\)\(([^)]+)/)
+        keys_end = 5
+      end
 
       keys = [ nil, :iban, :name, :remi, :eref, :ordp_id, :benm_id ]
-      
-      1.upto( 6 ) do | index |
+
+      1.upto( keys_end ) do | index |
+        md[index] = ' ' if md[index].nil?
         @fields[ keys[ index ] ] = md[ index ].strip
         @fields[ keys[ index ] ] = ' ' if @fields[ keys[ index ] ].empty?
       end
@@ -114,10 +129,10 @@ module SwiftClasses
     def foreign_account     
       description_string = get_description.squeeze( ' ' ).sub( /^:86: ?/, '' )
 
-      md = description_string.match( /^([^)]+) ?\) ?\( ?([^)]+) ?\) ?\( ?([^)]+) ?\) ?\( ?([^)]+) ?\) ?\( ?([^)]+) ?\)/ )
+      md = description_string.match(/(.+)\)\((.+)\)\((.+)\)\((.+)\)\(([^)]+)/)
 
       keys = [ nil, :iban, :name, :remi, :eref, :ordp_id ]
-      
+
       1.upto( 5 ) do | index |
         @fields[ keys[ index ] ] = md[ index ].strip
         @fields[ keys[ index ] ] = ' ' if @fields[ keys[ index ] ].empty?
