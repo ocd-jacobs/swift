@@ -1,34 +1,36 @@
 require_relative '../lib/swift_classes/swift_file'
 
-teller = 0
+message_counter = 0
 
-File.open('D:\Mijn Documenten\Develop\Swift\Data\DFEZ.SWIFT', 'r') do |f|
-  swift = SwiftClasses::SwiftFile.new(f)
+File.open( ARGV[ 0 ], 'r' ) do | file_object |
+  swift = SwiftClasses::SwiftFile.new( file_object )
   swift.messages.each do | message |
-    message.statement_lines.each do | line |
-      print message.statement_number.field( :statement_number ) + '/' + message.statement_number.field( :sequence_number ) + ';'
-      print line.field( :value_date ) + ';'
-      print line.field( :d_c ) + ';'
+    message.statement_lines.each do | statement_line |
+      print message.statement_number.field( :statement_number ) + '/'
+      print message.statement_number.field( :sequence_number ) + ';'
+      print statement_line.field( :value_date ) + ';'
+      print statement_line.field( :d_c ) + ';'
 
-      amount = line.field( :transaction_amount )
-      if line.field( :d_c ) == 'D'
-        amount *= -1
-        amount = amount.to_f.to_s
+      amount = statement_line.field( :transaction_amount )
+      amount *= -1 if statement_line.field( :d_c ) == 'D'
+      amount = amount.to_f.to_s
+      
+      if statement_line.field( :d_c ) == 'D'
         print amount + ';' + '0.0' + ';' + amount + ';'
       else
-        amount = amount.to_f.to_s
         print amount + ';' + amount + ';' + '0.0' + ';'
       end
 
-      print line.field( :iban ) + ';'
-      print line.field( :name ) + ';'
-      print line.field( :transaction_type ) + ';'
-      puts line.field( :remi )
+      print statement_line.field( :iban ) + ';'
+      print statement_line.field( :name ) + ';'
+      print statement_line.field( :transaction_type ) + ';'
+      puts  statement_line.field( :remi )
+    end
 
+    if $DEBUG
+      message_counter += 1
+      break if message_counter > 10
     end
     
-    teller += 1
-    break if teller > 1000
   end
 end
-

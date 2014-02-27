@@ -1,2 +1,2 @@
 cls
-ruby -w test.rb
+ruby test.rb "D:\Mijn Documenten\Develop\Swift\Data\DFEZ.SWIFT"

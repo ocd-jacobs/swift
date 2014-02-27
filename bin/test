@@ -1,0 +1,2 @@
+clear
+ruby test.rb ~/Develop/swift/data/DFEZ.SWIFT
