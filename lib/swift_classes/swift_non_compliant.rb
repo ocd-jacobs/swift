@@ -4,9 +4,9 @@ module SwiftClasses
       description = @raw_descriptions[ 0 ].sub( /^:86: ?/, '' )
       
       case description
-      when /^\d\d\./ then bank_account_begin                # regel begint met twee cijfers en een punt
-      when /^[A-Z]{2}\d{2}[A-Z]{2}/ then pre_2014_sepa      # regel begnt met IBAN nummer
-      when /^[A-Z]{2}\d{2}/ then foreign_account            # regel beterft waarschijnlijk een buitenlands rekening nummer
+      when /^\d\d\./ then bank_account_begin                # regel begint met twee cijfers en een punt: bank rekening
+      when /^[A-Z]{2}\d{2}[A-Z]{2}/ then pre_2014_sepa      # regel begint met IBAN nummer
+      when /^[A-Z]{2}\d{2}/ then foreign_account            # regel betreft waarschijnlijk een buitenlands rekening nummer
       when /^GIRO/ then giro_account_begin                  # regel begint met GIRO
       when /^ZEROBALANCING/ then zero_balancing
       when /^TOTAAL BETALINGEN/ then batch_payment
@@ -14,8 +14,7 @@ module SwiftClasses
       when /^NONREF/ then batch_payment
       when /^\d{16}/ then payments_received
       when /^COR +ST2/ then sepa_payments_received
-      else
-        no_specification
+      when /^ONZE REF/ then invoice                         # regel betreft factuur betalingen
       end
     end
 
@@ -148,6 +147,22 @@ module SwiftClasses
       no_specification
     end
 
+    def invoice
+      description_string = get_description.squeeze( ' ' ).sub( /^:86: ?/, '' )
+
+      @fields[ :iban ] = description_string.slice(/[A-Z]{2}\d{2}[A-Z]{2,}\d{8,}/)
+      @fields[ :iban ] = description_string.slice(/[A-Z]{2}\d{8,}/) if @fields[ :iban ].nil?
+      @fields[ :iban ] = ' ' if @fields[ :iban ].nil?
+
+      if md = description_string.match( /^.*BEGUNST.1([^\d]+)/ )
+      elsif md = description_string.match( /^.*BEGUNST.([^\/]+)/ )
+      elsif md = description_string.match( /^.*OPDRACHTGEVER\d\/([^\/]+)/ )
+      elsif md = description_string.match( /^.*OPDRACHTGEVER([^\/]+)/ )
+      end
+
+      @fields[ :name ] = md[1] if md
+    end
+    
     def deposit
       no_specification
     end

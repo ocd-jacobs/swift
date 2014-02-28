@@ -326,7 +326,7 @@ describe SwiftClasses::SwiftStatementLine do
       line.field( :eref ).should == ' ' 
     end
     
-    it "converts non specified lines by specifying tag86 under remittance information" do
+    it "converts invoice lines" do
       line = SwiftClasses::SwiftStatementLine.new( ':61:1303220322C32371,00N792NONREF',
                                                    '',
                                                    [
@@ -339,7 +339,8 @@ describe SwiftClasses::SwiftStatementLine do
                                                    ] )
 
       line.field( :iban ).should == ' '
-      line.field( :remi ).should == 'ONZE REF 2013032200182281 OORSPR. GBP 28283,97KOERS BTL (EUR/GBP) 1,1445000ONTV RBS EUR 32371,00ALLE KOSTEN T.L.V. OPDRACHTGEVERASSOCIATION OF CHIEF POLICEOFFICERS 1ST FLOOR 10 VICTORIA STREETLONDON SW1H 0NN ISDEP PAYMT 1ISDEP - EC PRE FINANCING GRANT PAYMENT'
+      line.field( :name ).should == 'ASSOCIATION OF CHIEF POLICEOFFICERS 1ST FLOOR 10 VICTORIA STREETLONDON SW1H 0NN ISDEP PAYMT 1ISDEP - EC PRE FINANCING GRANT PAYMENT'
+      line.field( :remi ).should == ' '
       line.field( :eref ).should == ' ' 
     end
     

@@ -12,6 +12,7 @@ module SwiftClasses
 
       @messages = []
       @swift_61_string = ''
+      @total_amount = 0
     end
     
     def messages
@@ -71,6 +72,9 @@ module SwiftClasses
       if tag =~ /61/
         unless @swift_61_string.empty?
           @message.statement_lines << SwiftStatementLine.new( @swift_61_string, @swift_61_extra_string, @swift_86_array )
+          amount = @message.statement_lines[ -1 ].field( :transaction_amount )
+          amount *= -1 if @message.statement_lines[ -1 ].field( :d_c ) == 'D'
+          @total_amount += amount
         end
         
         @swift_61_string = line
@@ -94,6 +98,10 @@ module SwiftClasses
       
       if tag =~ /62/
         @message.statement_lines << SwiftStatementLine.new( @swift_61_string, @swift_61_extra_string, @swift_86_array )
+        amount = @message.statement_lines[ -1 ].field( :transaction_amount )
+        amount *= -1 if @message.statement_lines[ -1 ].field( :d_c ) == 'D'
+        @total_amount += amount
+
         @swift_61_string = ''
         @swift_61_extra_string = ''
         @swift_86_array = []
@@ -128,6 +136,30 @@ module SwiftClasses
     def process_unkown( line )
       raise RuntimeError, 'Invalid Swift Tag'
     end
+
+    def print_tags
+      $stderr.puts "\n"
+      count_tags.each do |key, value|
+        $stderr.puts "#{key}\t=>\t#{value}"
+      end
+      $stderr.puts "\n"
+    end
+
+    def print_total_amount
+      $stderr.puts "\nTotal amount => #{@total_amount.to_f.to_s}\n"
+    end
+    
+    def count_tags
+      tags = Hash.new(0)
+
+      File.open( @swift_file, 'r' ).each_line do | line |
+        tag = line[ /^:\d\d.?:/ ]
+        tags[ tag ] += 1
+      end
+
+      tags
+    end
+
   end
   
 end

@@ -49,6 +49,8 @@ module SwiftClasses
       else
         process_non_compliant
       end
+
+      text_86
     end
 
     def value_date( line )
@@ -214,12 +216,22 @@ module SwiftClasses
                             :marf,
                             :svcl,
                             :benm_name,
-                            :csid
+                            :csid,
+                            :text_86
                            ]
 
       transaction_fields.each do | field |
         @fields[ field ] = ' '
       end
+    end
+
+    def text_86
+      description_string = ''
+      @raw_descriptions.each do |description|
+        description_string << '_' + description.chomp + '_'
+      end
+
+      @fields[ :text_86 ] = description_string.squeeze(' ').sub( /^:86: ?/, '' )
     end
     
   end

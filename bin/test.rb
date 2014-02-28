@@ -24,13 +24,18 @@ File.open( ARGV[ 0 ], 'r' ) do | file_object |
       print statement_line.field( :iban ) + ';'
       print statement_line.field( :name ) + ';'
       print statement_line.field( :transaction_type ) + ';'
-      puts  statement_line.field( :remi )
+      print statement_line.field( :remi ) + ';'
+
+      puts  statement_line.field( :text_86 )
     end
 
     if $DEBUG
       message_counter += 1
       break if message_counter > 10
     end
-    
+
   end
+
+  swift.print_tags
+  swift.print_total_amount
 end
