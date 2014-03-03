@@ -60,28 +60,23 @@ module SwiftClasses
     end
     
     def pre_2014_sepa
+      description_string = description_squeeze
 
-      description_string = get_description.squeeze( ' ' ).sub( /^:86: ?/, '' )
+      description_values = description_string.split( ')(')
+      keys_end = description_values.length
 
-      md = description_string.match(/(.+)\)\((.+)\)\((.+)\)\((.+)\)\(([^)]+)\)\(([^)]+)/)
-      keys_end = 6
-      
-      unless md
-        md = description_string.match(/(.+)\)\((.+)\)\((.+)\)\((.+)\)\(([^)]+)/)
-        keys_end = 5
-      end
+      keys = [ :iban, :name, :remi, :eref, :ordp_id, :benm_id ]
+      description_values.length > keys.length ? keys.length : description_values.length
 
-      keys = [ nil, :iban, :name, :remi, :eref, :ordp_id, :benm_id ]
-
-      1.upto( keys_end ) do | index |
-        md[index] = ' ' if md[index].nil?
-        @fields[ keys[ index ] ] = md[ index ].strip
+      keys_end.times do | index |
+        description_values[index] = ' ' if description_values[index].nil?
+        @fields[ keys[ index ] ] = description_values[ index ].strip
         @fields[ keys[ index ] ] = ' ' if @fields[ keys[ index ] ].empty?
       end
     end
 
     def zero_balancing
-      description_string = get_description.squeeze( ' ' ).sub( /^:86: ?/, '' )
+      description_string = description_squeeze
 
       md = description_string.match( /AND (\d+)/ )
       
@@ -126,20 +121,23 @@ module SwiftClasses
     end
 
     def foreign_account     
-      description_string = get_description.squeeze( ' ' ).sub( /^:86: ?/, '' )
+      description_string = description_squeeze
 
-      md = description_string.match(/(.+)\)\((.+)\)\((.+)\)\((.+)\)\(([^)]+)/)
+      description_values = description_string.split( ')(')
+      keys_end = description_values.length
 
-      keys = [ nil, :iban, :name, :remi, :eref, :ordp_id ]
+      keys = [ :iban, :name, :remi, :eref, :ordp_id ]
+      description_values.length > keys.length ? keys.length : description_values.length
 
-      1.upto( 5 ) do | index |
-        @fields[ keys[ index ] ] = md[ index ].strip
+      keys_end.times do | index |
+        description_values[index] = ' ' if description_values[index].nil?
+        @fields[ keys[ index ] ] = description_values[ index ].strip
         @fields[ keys[ index ] ] = ' ' if @fields[ keys[ index ] ].empty?
       end
     end
 
     def no_specification
-      description_string = get_description.squeeze( ' ' ).sub( /^:86: ?/, '' )
+      description_string = description_squeeze
       @fields[ :remi ] = description_string
     end
     
@@ -148,7 +146,7 @@ module SwiftClasses
     end
 
     def invoice
-      description_string = get_description.squeeze( ' ' ).sub( /^:86: ?/, '' )
+      description_string = description_squeeze
 
       @fields[ :iban ] = description_string.slice(/[A-Z]{2}\d{2}[A-Z]{2,}\d{8,}/)
       @fields[ :iban ] = description_string.slice(/[A-Z]{2}\d{8,}/) if @fields[ :iban ].nil?
@@ -165,6 +163,10 @@ module SwiftClasses
     
     def deposit
       no_specification
+    end
+
+    def description_squeeze
+      get_description.squeeze( ' ' ).sub( /^:86: ?/, '' )
     end
   end
 end

@@ -139,7 +139,7 @@ module SwiftClasses
       end
     end
 
-    def process_unkown( line )
+    def process_unknown( line )
       raise RuntimeError, 'Invalid Swift Tag'
     end
 
