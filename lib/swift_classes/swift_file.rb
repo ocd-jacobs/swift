@@ -3,6 +3,8 @@ require_relative '../swift'
 module SwiftClasses
 
   class SwiftFile
+    attr_reader :total_lines, :total_tags, :amount_addition, :count_addition, :amount_subtraction, :count_subtraction
+    
     def initialize(swift_file_object)
       if swift_file_object.class == File
         @swift_file = swift_file_object
@@ -12,7 +14,14 @@ module SwiftClasses
 
       @messages = []
       @swift_61_string = ''
-      @total_amount = 0
+
+      @total_lines = 0
+      @total_tags = Hash.new(0)
+
+      @amount_addition = 0
+      @count_addition = 0
+      @amount_subtraction = 0
+      @count_subtraction = 0
     end
     
     def messages
@@ -31,6 +40,7 @@ module SwiftClasses
 
     def process_swift_line( file_line )
       line = file_line.chomp
+      control_count_line( line )
       
       if line =~ /^{\d/
         @message = SwiftMessage.new
@@ -72,9 +82,7 @@ module SwiftClasses
       if tag =~ /61/
         unless @swift_61_string.empty?
           @message.statement_lines << SwiftStatementLine.new( @swift_61_string, @swift_61_extra_string, @swift_86_array )
-          amount = @message.statement_lines[ -1 ].field( :transaction_amount )
-          amount *= -1 if @message.statement_lines[ -1 ].field( :d_c ) == 'D'
-          @total_amount += amount
+          control_count_amount( @message.statement_lines[ -1 ] )
         end
         
         @swift_61_string = line
@@ -98,9 +106,7 @@ module SwiftClasses
       
       if tag =~ /62/
         @message.statement_lines << SwiftStatementLine.new( @swift_61_string, @swift_61_extra_string, @swift_86_array )
-        amount = @message.statement_lines[ -1 ].field( :transaction_amount )
-        amount *= -1 if @message.statement_lines[ -1 ].field( :d_c ) == 'D'
-        @total_amount += amount
+        control_count_amount( @message.statement_lines[ -1 ] )
 
         @swift_61_string = ''
         @swift_61_extra_string = ''
@@ -137,29 +143,24 @@ module SwiftClasses
       raise RuntimeError, 'Invalid Swift Tag'
     end
 
-    def print_tags
-      $stderr.puts "\n"
-      count_tags.each do |key, value|
-        $stderr.puts "#{key}\t=>\t#{value}"
+    def control_count_line( line )
+      @total_lines += 1
+      tag = line[ /^:\d\d.?:/ ]
+      @total_tags[ tag ] += 1
+    end
+
+    def control_count_amount( statement_line)
+      amount = statement_line.field( :transaction_amount )
+      d_c = statement_line.field( :d_c )
+
+      if d_c == 'C'
+        @amount_addition += amount
+        @count_addition += 1
+      else
+        @amount_subtraction -= amount
+        @count_subtraction += 1
       end
-      $stderr.puts "\n"
     end
-
-    def print_total_amount
-      $stderr.puts "\nTotal amount => #{@total_amount.to_f.to_s}\n"
-    end
-    
-    def count_tags
-      tags = Hash.new(0)
-
-      File.open( @swift_file, 'r' ).each_line do | line |
-        tag = line[ /^:\d\d.?:/ ]
-        tags[ tag ] += 1
-      end
-
-      tags
-    end
-
   end
   
 end
