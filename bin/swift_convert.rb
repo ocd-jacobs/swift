@@ -47,7 +47,7 @@ unless File.exists?( ARGV[ 0 ] )
 end
 
 File.open( ARGV[ 0 ], 'r' ) do | file_object |
-  output_file = ARGV[ 0 ].downcase.sub( /\.\w+$/, '.csv' )
+  output_file = ARGV[ 0 ].sub( /\.\w+$/, '.csv' )
 
   if File.exists?( output_file )
     $stderr.puts "\n\n\n*******************************************************************************"
@@ -59,7 +59,7 @@ File.open( ARGV[ 0 ], 'r' ) do | file_object |
     $stderr.print 'Bestand overschrijven (J/N): '
     proceed = $stdin.gets.upcase.chomp
     unless  proceed == 'J'
-      $stderr.puts "\n***** Bewerking afgebroken! *****\n"
+      $stderr.puts "\n***** Bewerking afgebroken! *****\n\n"
       file_object.close
       exit
     end
