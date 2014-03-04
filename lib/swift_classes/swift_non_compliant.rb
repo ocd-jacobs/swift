@@ -1,20 +1,45 @@
+# ******************************************************************************
+# File    : SWIFT_NON_COMPLIANT.RB
+# ------------------------------------------------------------------------------
+# Author  : J.M. Jacobs
+# Date    : 03 March 2014
+# Version : 1.0
+#
+# (C) 2014: This program is free software: you can redistribute it and/or modify
+#           it under the terms of the GNU General Public License as published by
+#           the Free Software Foundation, either version 3 of the License, or
+#           (at your option) any later version.
+#
+#           This program is distributed in the hope that it will be useful,
+#           but WITHOUT ANY WARRANTY; without even the implied warranty of
+#           MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+#           GNU General Public License for more details.
+#
+#           You should have received a copy of the GNU General Public License
+#           along with this program.  If not, see <http://www.gnu.org/licenses/>.
+#
+# Notes   : Extention of the SwiftStatementLine class. Contains fuctionality
+#           for handeling statement line descriptions (tag :86:) that do not
+#           comply with standard Swift MT940 layouts.
+# ******************************************************************************
+
 module SwiftClasses
   class SwiftStatementLine < SwiftLine
     def process_non_compliant
       description = @raw_descriptions[ 0 ].sub( /^:86: ?/, '' )
       
       case description
-      when /^\d\d\./ then bank_account_begin                # regel begint met twee cijfers en een punt: bank rekening
-      when /^[A-Z]{2}\d{2}[A-Z]{2}/ then pre_2014_sepa      # regel begint met IBAN nummer
-      when /^[A-Z]{2}\d{2}/ then foreign_account            # regel betreft waarschijnlijk een buitenlands rekening nummer
-      when /^GIRO/ then giro_account_begin                  # regel begint met GIRO
+      when /^\d\d\./ then bank_account_begin                # line starts with two nunbers follwed by a dot: bank account
+      when /^[A-Z]{2}\d{2}[A-Z]{2}/ then pre_2014_sepa      # line starts with a IBAN number
+      when /^[A-Z]{2}\d{2}/ then foreign_account            # line probably starts with a foreign bank account number
+      when /^GIRO/ then giro_account_begin
       when /^ZEROBALANCING/ then zero_balancing
       when /^TOTAAL BETALINGEN/ then batch_payment
       when /^GESTORT DOOR/ then deposit
       when /^NONREF/ then batch_payment
-      when /^\d{16}/ then payments_received
+      when /^\d{16}/ then payments_received                 # line starts with 16 digits
       when /^COR +ST2/ then sepa_payments_received
-      when /^ONZE REF/ then invoice                         # regel betreft factuur betalingen
+      when /^ONZE REF/ then invoice
       end
     end
 

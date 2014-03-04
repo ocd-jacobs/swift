@@ -1,5 +1,44 @@
-Swift MT940 file conversion
+SWIFT_CONVERT.RB
 
->>>>> UNDER CONSTRUCTION <<<<<
+Git: github.com/ocd-jacobs/swift
 
-Repository: https://github.com/ocd-jacobs/swift.git
+Author   : J.M. Jacobs
+Copyright: 2014
+Licence  : GPLv3
+Version  : 1.0
+
+DESCRIPTION
+
+swift_convert converts a Swift MT940 file to a CVS file.
+The progam consist of two parts:
+
+- swift_convert.rb
+
+  Uses the included class library to convert a Swift MT940 file to a CVS file.
+  When finished converting it prints a number of control totals to standard
+  output.
+
+- a class library
+
+  Contains classes representing Swift files, messages and lines. The classes
+  handle convervion of the Swift file to collection of in-memory clases.
+  The class library sources are found in /lib/swift_classes.
+
+
+USAGE
+
+ruby swift_convert.rb <swift_file>
+
+
+REQUIREMENTS
+
+- ruby  2.0
+- rspec 2.14
+
+
+NOTES
+
+- The output file is created in the same directory as the input file
+
+- The program is tested with Royal Bank of Scotland Swift files as used
+  in the Netherlands

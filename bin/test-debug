@@ -1,2 +1,2 @@
 clear
-ruby -w -d test.rb ~/Develop/swift/data/DFEZ.SWIFT
+ruby -w -d swift_convert.rb ~/Develop/swift/data/DFEZ.SWIFT

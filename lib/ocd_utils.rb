@@ -1,5 +1,5 @@
 # ******************************************************************************
-# File    : SWIFT_MESSAGE.RB
+# File    : OCD_UTILS.RB
 # ------------------------------------------------------------------------------
 # Author  : J.M. Jacobs
 # Date    : 03 March 2014
@@ -18,19 +18,32 @@
 #           You should have received a copy of the GNU General Public License
 #           along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #
-# Notes   : Class representing a Swift MT940 message
+# Notes   : General utility fuctions
 # ******************************************************************************
 
-module SwiftClasses
-
-  class SwiftMessage
-    attr_accessor :header, :transaction_reference, :related_reference, :account_identification,
-                  :statement_number, :opening_balance, :statement_lines, :closing_balance,
-                  :available_balance, :forward_balance, :description, :trailer
-  
-    def initialize
-      @statement_lines = []
-    end
+module OCD_MRJ
+  #
+  # pretty_print_number
+  # Formats a number with thousands separators
+  #
+  def self::pretty_print_number( number )
+    parts = number.to_s.split( '.' )
+    parts[ 0 ].gsub!( /(\d)(?=(\d\d\d)+(?!\d))/, "\\1," )
+    parts.join( '.' )
   end
-  
+
+  #
+  # dutch_number_format
+  # Formats a number with periods as thousands separators
+  # and a comma as decimal separator
+  #
+  def self::dutch_number_format( number )
+    print_number = pretty_print_number( number )
+    
+    print_number.gsub!( /\./, '#' )
+    print_number.gsub!( /,/, '.' )
+    print_number.gsub!( /#/, ',' )
+
+    print_number
+  end
 end

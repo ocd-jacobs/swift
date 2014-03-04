@@ -1,2 +1,2 @@
 cls
-ruby -w -d test.rb "D:\Mijn Documenten\Develop\Swift\Data\DFEZ.SWIFT"
+ruby -w -d swift_convert.rb "D:\Mijn Documenten\Develop\Swift\Data\DFEZ.SWIFT"
